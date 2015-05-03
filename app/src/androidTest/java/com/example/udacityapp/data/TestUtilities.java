@@ -1,4 +1,4 @@
-package com.example.android.sunshine.app.data;
+package com.example.udacityapp.data;
 
 import android.content.ContentValues;
 import android.database.ContentObserver;
@@ -8,7 +8,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.test.AndroidTestCase;
 
-import com.example.android.sunshine.app.utils.PollingCheck;
+import com.example.udacityapp.utils.PollingCheck;
 
 import java.util.Map;
 import java.util.Set;
