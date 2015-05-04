@@ -70,7 +70,7 @@ public class ForecastFragment extends Fragment {
     private void updateWeather() {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
         String location = prefs.getString(getString(R.string.pref_location_key), getString(R.string.pref_location_default));
-        new FetchWeatherTask().execute(location);
+        new FetchWeatherTask(getActivity(), mForecastAdapter).execute(location);
     }
 
     @Override
@@ -119,111 +119,6 @@ public class ForecastFragment extends Fragment {
         return rootView;
     }
 
-    private class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
-
-        private URL constructURL(String zip){
-            // Construct the URL for the OpenWeatherMap query
-            // Possible parameters are avaiable at OWM's forecast API page, at
-            // http://openweathermap.org/API#forecast
-            URL url;
-            try {
-                Uri.Builder builder = new Uri.Builder();
-                builder.scheme("http")
-                        .authority("api.openweathermap.org")
-                        .appendPath("data")
-                        .appendPath("2.5")
-                        .appendPath("forecast")
-                        .appendPath("daily")
-                        .appendQueryParameter("q",zip)
-                        .appendQueryParameter("mode","json")
-                        .appendQueryParameter("units","metric")
-                        .appendQueryParameter("cnt","7");
-                //url = new URL("http://api.openweathermap.org/data/2.5/forecast/daily?q=94043&mode=json&units=metric&cnt=7");
-                url = new URL(builder.build().toString());
-            }
-            catch(Exception e) {
-                return null;
-            }
-            return url;
-        }
-
-        protected String[] doInBackground(String... param) {
-            // These two need to be declared outside the try/catch
-            // so that they can be closed in the finally block.
-            HttpURLConnection urlConnection = null;
-            BufferedReader reader = null;
-
-            // Will contain the raw JSON response as a string.
-            String forecastJsonStr;
-
-            try {
-                if(0 == param.length) {
-                    return null;
-                }
-
-                URL url = constructURL(param[0]);
-                if(url == null) {
-                    return null;
-                }
-
-                // Create the request to OpenWeatherMap, and open the connection
-                urlConnection = (HttpURLConnection) url.openConnection();
-                urlConnection.setRequestMethod("GET");
-                urlConnection.connect();
-
-                // Read the input stream into a String
-                InputStream inputStream = urlConnection.getInputStream();
-                if (inputStream == null) {
-                    // Nothing to do.
-                    return null;
-                }
-                reader = new BufferedReader(new InputStreamReader(inputStream));
-
-                StringBuilder buffer = new StringBuilder();
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    // Since it's JSON, adding a newline isn't necessary (it won't affect parsing)
-                    // But it does make debugging a *lot* easier if you print out the completed
-                    // buffer for debugging.
-                    buffer.append(line).append("\n");
-                }
-
-                if (buffer.length() == 0) {
-                    // Stream was empty.  No point in parsing.
-                    return null;
-                }
-                forecastJsonStr = buffer.toString();
-                return new WeatherDataParser().getWeatherDataFromJson(forecastJsonStr,7);
-            } catch (IOException e) {
-                Log.e("PlaceholderFragment", "Error ", e);
-                // If the code didn't successfully get the weather data, there's no point in attemping
-                // to parse it.
-                return null;
-            } catch(JSONException e){
-                Log.e("PlaceholderFragment", "Error ", e);
-                return null;
-            } finally {
-                if (urlConnection != null) {
-                    urlConnection.disconnect();
-                }
-                if (reader != null) {
-                    try {
-                        reader.close();
-                    } catch (final IOException e) {
-                        Log.e("PlaceholderFragment", "Error closing stream", e);
-                    }
-                }
-            }
-        }
-
-        protected void onPostExecute(String[] result) {
-            if(result != null) {
-                mForecastAdapter.clear();
-                mForecastAdapter.addAll(result);
-            }
-        }
-
-    }
 
     public class WeatherDataParser {
 
