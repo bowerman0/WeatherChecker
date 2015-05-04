@@ -250,6 +250,9 @@ public class WeatherProvider extends ContentProvider {
         final int match = sUriMatcher.match(uri);
         int rowsDeleted;
 
+        if( selection == null)
+            selection = "1";
+
         switch (match) {
             case WEATHER: {
                 rowsDeleted = db.delete(WeatherContract.WeatherEntry.TABLE_NAME, selection,selectionArgs);
@@ -262,7 +265,10 @@ public class WeatherProvider extends ContentProvider {
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
-        getContext().getContentResolver().notifyChange(uri, null);
+
+        if(rowsDeleted != 0) {
+            getContext().getContentResolver().notifyChange(uri, null);
+        }
         return rowsDeleted;
     }
 
@@ -280,6 +286,9 @@ public class WeatherProvider extends ContentProvider {
         final int match = sUriMatcher.match(uri);
         int rowsUpdated;
 
+        if( selection == null)
+            selection = "1";
+
         switch (match) {
             case WEATHER: {
                 rowsUpdated = db.update(WeatherContract.WeatherEntry.TABLE_NAME, values, selection,selectionArgs);
@@ -292,7 +301,10 @@ public class WeatherProvider extends ContentProvider {
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
-        getContext().getContentResolver().notifyChange(uri, null);
+
+        if(rowsUpdated != 0) {
+            getContext().getContentResolver().notifyChange(uri, null);
+        }
         return rowsUpdated;
     }
 
