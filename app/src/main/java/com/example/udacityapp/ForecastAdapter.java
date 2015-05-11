@@ -53,9 +53,6 @@ public class ForecastAdapter extends CursorAdapter {
         return VIEW_TYPE_COUNT;
     }
 
-    /**
-     * Copy/paste note: Replace existing newView() method in ForecastAdapter with this one.
-     */
     @Override
     public View newView(Context context, Cursor cursor, ViewGroup parent) {
         // Choose the layout type
@@ -84,8 +81,21 @@ public class ForecastAdapter extends CursorAdapter {
         // we'll keep the UI functional with a simple (and slow!) binding.
         ViewHolder viewHolder = (ViewHolder) view.getTag();
 
-        // Use placeholder image for now
-        viewHolder.iconView.setImageResource(R.mipmap.ic_launcher);
+        int viewType = getItemViewType(cursor.getPosition());
+        switch (viewType) {
+            case VIEW_TYPE_TODAY: {
+                // Get weather icon
+                viewHolder.iconView.setImageResource(Utility.getArtResourceForWeatherCondition(
+                        cursor.getInt(ForecastFragment.COL_WEATHER_CONDITION_ID)));
+                break;
+            }
+            case VIEW_TYPE_FUTURE_DAY: {
+                // Get weather icon
+                viewHolder.iconView.setImageResource(Utility.getIconResourceForWeatherCondition(
+                        cursor.getInt(ForecastFragment.COL_WEATHER_CONDITION_ID)));
+                break;
+            }
+        }
 
         // Read date from cursor
         long dateInMillis = cursor.getLong(ForecastFragment.COL_WEATHER_DATE);
